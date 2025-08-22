@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: simulacao-credito-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - simulacao-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simulacao-credito-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__SqlServer=Server=dbhackathon.database.windows.net,1433;Database=hack;User Id=hack;Password=Password23;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+      - ConnectionStrings__LocalSqlServer=Server=sqlserver,1433;Database=SimulacaoCredito;User Id=hackathon;Password=TimeBECID@123;Encrypt=False;TrustServerCertificate=True;
+      - EventHub__ConnectionString=Endpoint=sb://eventhack.servicebus.windows.net/;SharedAccessKeyName=hack;SharedAccessKey=HeHeVaVayVkntO2FnjQcs2Ilh/4MUD0a4y+AEhKp8z+g=;EntityPath=simulacoes
+      - EventHub__EntityPath=simulacoes
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+    networks:
+      - simulacao-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  simulacao-network:
+    driver: bridge
