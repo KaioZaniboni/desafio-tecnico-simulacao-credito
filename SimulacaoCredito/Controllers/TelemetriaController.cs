@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SimulacaoCredito.Application.DTOs;
 using SimulacaoCredito.Application.Interfaces;
@@ -7,6 +8,7 @@ namespace SimulacaoCredito.Controllers;
 
 [ApiController]
 [Route("api/v1")]
+[Authorize]
 [Produces("application/json")]
 public class TelemetriaController : ControllerBase
 {

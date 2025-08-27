@@ -148,6 +148,80 @@ namespace SimulacaoCredito.Migrations
                     b.ToTable("TelemetriaRequisicao", "dbo");
                 });
 
+            modelBuilder.Entity("SimulacaoCredito.Domain.Entities.Usuario", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit")
+                        .HasColumnName("Ativo");
+
+                    b.Property<bool>("ContaBloqueada")
+                        .HasColumnType("bit")
+                        .HasColumnName("ContaBloqueada");
+
+                    b.Property<DateTimeOffset?>("DataBloqueio")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("DataBloqueio");
+
+                    b.Property<DateTimeOffset>("DataCriacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("DataCriacao")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<DateTimeOffset?>("DataUltimoLogin")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("DataUltimoLogin");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Email");
+
+                    b.Property<string>("NomeCompleto")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("NomeCompleto");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("PasswordHash");
+
+                    b.Property<int>("TentativasLogin")
+                        .HasColumnType("int")
+                        .HasColumnName("TentativasLogin");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("Username");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Ativo")
+                        .HasDatabaseName("IX_Usuario_Ativo");
+
+                    b.HasIndex("DataCriacao")
+                        .HasDatabaseName("IX_Usuario_DataCriacao");
+
+                    b.HasIndex("Email")
+                        .HasDatabaseName("IX_Usuario_Email");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Usuario_Username");
+
+                    b.ToTable("Usuarios");
+                });
+
             modelBuilder.Entity("SimulacaoCredito.Domain.Entities.Parcela", b =>
                 {
                     b.HasOne("SimulacaoCredito.Domain.Entities.Simulacao", "Simulacao")

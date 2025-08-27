@@ -187,3 +187,6 @@ E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\Simula
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Sinks.Console.dll
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Sinks.Debug.dll
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Sinks.File.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\BCrypt.Net-Next.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.InMemory.dll

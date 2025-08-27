@@ -166,8 +166,298 @@
 						"description": "Cria uma nova simulação de crédito.\n\n**Parâmetros:**\n- valorDesejado: Valor do empréstimo (R$ 1.000 - R$ 2.000.000)\n- prazo: Prazo em meses (1 - 420)\n\n**Retorna:** Simulação com cálculos SAC e PRICE"
 					},
 					"response": []
+				},
+				{
+					"name": "GET Listar Simulações",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Simulações listadas com sucesso!');",
+									"    console.log('📄 Página:', response.pagina, 'de', Math.ceil(response.qtdRegistros / response.qtdRegistrosPagina));",
+									"    console.log('📊 Total de registros:', response.qtdRegistros);",
+									"    console.log('📋 Registros nesta página:', response.registros.length);",
+									"} else {",
+									"    console.log('❌ Erro ao listar simulações:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/simulacoes?pagina=1&tamanhoPagina=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"simulacoes"
+							],
+							"query": [
+								{
+									"key": "pagina",
+									"value": "1",
+									"description": "Número da página (padrão: 1)"
+								},
+								{
+									"key": "tamanhoPagina",
+									"value": "10",
+									"description": "Registros por página (padrão: 10, máximo: 100)"
+								}
+							]
+						},
+						"description": "Lista todas as simulações com paginação.\n\n**Query Parameters:**\n- pagina: Número da página (padrão: 1)\n- tamanhoPagina: Registros por página (padrão: 10, máximo: 100)"
+					},
+					"response": []
+				},
+				{
+					"name": "GET Obter Simulação por ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Simulação encontrada!');",
+									"    console.log('🆔 ID:', response.idSimulacao);",
+									"    console.log('🏪 Produto:', response.descricaoProduto);",
+									"    console.log('💰 Valor:', 'R$', response.valorDesejado.toLocaleString('pt-BR'));",
+									"    console.log('📅 Prazo:', response.prazo, 'meses');",
+									"} else if (pm.response.code === 404) {",
+									"    console.log('❌ Simulação não encontrada com este ID.');",
+									"} else {",
+									"    console.log('❌ Erro ao obter simulação:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/simulacoes/{{last_simulacao_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"simulacoes",
+								"{{last_simulacao_id}}"
+							]
+						},
+						"description": "Obtém uma simulação específica pelo ID.\n\n**Path Parameter:**\n- id: ID da simulação\n\n**Nota:** Usa automaticamente o ID da última simulação criada."
+					},
+					"response": []
+				},
+				{
+					"name": "GET Volume por Produto/Dia",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Volume por produto obtido com sucesso!');",
+									"    console.log('📅 Data de referência:', response.dataReferencia);",
+									"    console.log('📊 Total de produtos:', response.produtos.length);",
+									"} else {",
+									"    console.log('❌ Erro ao obter volume por produto:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/simulacoes/por-produto?dataReferencia=2025-08-27T10:00:00.000Z",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"simulacoes",
+								"por-produto"
+							],
+							"query": [
+								{
+									"key": "dataReferencia",
+									"value": "2025-08-27T10:00:00.000Z",
+									"description": "Data de referência (formato ISO 8601)"
+								}
+							]
+						},
+						"description": "Obtém o volume de simulações por produto em uma data específica.\n\n**Query Parameter:**\n- dataReferencia: Data no formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)"
+					},
+					"response": []
 				}
-			]
+			],
+			"description": "Endpoints para gerenciar simulações de crédito.\n\n**Funcionalidades:**\n- Criar novas simulações\n- Listar simulações com paginação\n- Consultar simulação específica\n- Obter relatórios de volume"
+		},
+		{
+			"name": "🏪 Produtos",
+			"item": [
+				{
+					"name": "GET Listar Todos os Produtos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Produtos listados com sucesso!');",
+									"    console.log('📊 Total de produtos:', response.length);",
+									"    response.forEach((produto, index) => {",
+									"        console.log(`${index + 1}. ${produto.nomeProduto} - Taxa: ${produto.taxaJuros}%`);",
+									"    });",
+									"} else {",
+									"    console.log('❌ Erro ao listar produtos:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"produtos"
+							]
+						},
+						"description": "Lista todos os produtos disponíveis no sistema.\n\n**Retorna:** Array com todos os produtos e suas características."
+					},
+					"response": []
+				},
+				{
+					"name": "GET Produtos Elegíveis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Produtos elegíveis encontrados!');",
+									"    console.log('📊 Total de produtos elegíveis:', response.length);",
+									"    response.forEach((produto, index) => {",
+									"        console.log(`${index + 1}. ${produto.nomeProduto} - Taxa: ${produto.taxaJuros}%`);",
+									"        console.log(`   Valor: R$ ${produto.valorMinimo.toLocaleString('pt-BR')} - R$ ${produto.valorMaximo.toLocaleString('pt-BR')}`);",
+									"        console.log(`   Prazo: ${produto.minimoMeses} - ${produto.maximoMeses} meses`);",
+									"    });",
+									"} else if (pm.response.code === 400) {",
+									"    console.log('❌ Parâmetros inválidos. Verifique valor e prazo.');",
+									"} else {",
+									"    console.log('❌ Erro ao consultar produtos elegíveis:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/produtos/elegiveis?valor=50000&prazo=12",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"produtos",
+								"elegiveis"
+							],
+							"query": [
+								{
+									"key": "valor",
+									"value": "50000",
+									"description": "Valor desejado do empréstimo"
+								},
+								{
+									"key": "prazo",
+									"value": "12",
+									"description": "Prazo desejado em meses"
+								}
+							]
+						},
+						"description": "Consulta produtos elegíveis para um valor e prazo específicos.\n\n**Query Parameters:**\n- valor: Valor do empréstimo desejado\n- prazo: Prazo em meses\n\n**Retorna:** Produtos que atendem aos critérios informados."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para consultar produtos de crédito.\n\n**Funcionalidades:**\n- Listar todos os produtos disponíveis\n- Consultar produtos elegíveis por valor/prazo"
+		},
+		{
+			"name": "📈 Telemetria",
+			"item": [
+				{
+					"name": "GET Dados de Telemetria",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Dados de telemetria obtidos com sucesso!');",
+									"    console.log('📊 Total de registros:', response.length);",
+									"    if (response.length > 0) {",
+									"        console.log('📅 Período:', response[0].dataHora, 'até', response[response.length - 1].dataHora);",
+									"    }",
+									"} else {",
+									"    console.log('❌ Erro ao obter telemetria:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/telemetria",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"telemetria"
+							]
+						},
+						"description": "Obtém dados de telemetria e observabilidade da aplicação.\n\n**Retorna:** Métricas de uso, performance e logs da aplicação."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para monitoramento e observabilidade.\n\n**Funcionalidades:**\n- Dados de telemetria da aplicação\n- Métricas de performance\n- Logs de auditoria"
 		}
 	],
 	"auth": {

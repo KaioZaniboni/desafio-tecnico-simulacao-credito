@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SimulacaoCredito.Application.DTOs;
+using SimulacaoCredito.Application.Interfaces;
 using SimulacaoCredito.Infrastructure.Security;
 
 namespace SimulacaoCredito.Controllers;
@@ -11,11 +12,19 @@ namespace SimulacaoCredito.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IJwtService _jwtService;
+    private readonly IUsuarioRepository _usuarioRepository;
+    private readonly IPasswordHashService _passwordHashService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IJwtService jwtService, ILogger<AuthController> logger)
+    public AuthController(
+        IJwtService jwtService,
+        IUsuarioRepository usuarioRepository,
+        IPasswordHashService passwordHashService,
+        ILogger<AuthController> logger)
     {
         _jwtService = jwtService;
+        _usuarioRepository = usuarioRepository;
+        _passwordHashService = passwordHashService;
         _logger = logger;
     }
 
@@ -29,54 +38,91 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(AuthenticationResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public ActionResult<AuthenticationResponseDto> GenerateToken([FromBody] AuthenticationRequestDto request)
+    public async Task<ActionResult<AuthenticationResponseDto>> GenerateToken([FromBody] AuthenticationRequestDto request)
     {
         _logger.LogInformation("Tentativa de autenticação para usuário: {Username}", request.Username);
 
-        // Validação básica das credenciais (em produção, validar contra base de dados)
-        if (!IsValidCredentials(request.Username, request.Password))
+        try
         {
-            _logger.LogWarning("Credenciais inválidas para usuário: {Username}", request.Username);
-            return Unauthorized(new ProblemDetails
+            // Buscar usuário no banco de dados
+            var usuario = await _usuarioRepository.ObterPorUsernameAsync(request.Username);
+
+            if (usuario == null)
             {
-                Title = "Credenciais inválidas",
-                Detail = "Username ou password incorretos",
-                Status = StatusCodes.Status401Unauthorized
+                _logger.LogWarning("Usuário não encontrado: {Username}", request.Username);
+                return Unauthorized(new ProblemDetails
+                {
+                    Title = "Credenciais inválidas",
+                    Detail = "Username ou password incorretos",
+                    Status = StatusCodes.Status401Unauthorized
+                });
+            }
+
+            // Verificar se a conta pode autenticar
+            if (!usuario.PodeAutenticar)
+            {
+                _logger.LogWarning("Conta não pode autenticar - Ativo: {Ativo}, Bloqueada: {Bloqueada}, Username: {Username}",
+                    usuario.Ativo, usuario.ContaBloqueada, request.Username);
+
+                var detail = usuario.ContaBloqueada
+                    ? "Conta bloqueada devido a múltiplas tentativas de login falhadas"
+                    : "Conta inativa";
+
+                return Unauthorized(new ProblemDetails
+                {
+                    Title = "Acesso negado",
+                    Detail = detail,
+                    Status = StatusCodes.Status401Unauthorized
+                });
+            }
+
+            // Verificar senha
+            var senhaValida = _passwordHashService.VerifyPassword(request.Password, usuario.PasswordHash);
+
+            if (!senhaValida)
+            {
+                _logger.LogWarning("Senha inválida para usuário: {Username}", request.Username);
+
+                // Registrar tentativa de login falhada
+                await _usuarioRepository.RegistrarTentativaLoginAsync(usuario, false);
+
+                return Unauthorized(new ProblemDetails
+                {
+                    Title = "Credenciais inválidas",
+                    Detail = "Username ou password incorretos",
+                    Status = StatusCodes.Status401Unauthorized
+                });
+            }
+
+            // Login bem-sucedido
+            await _usuarioRepository.RegistrarTentativaLoginAsync(usuario, true);
+
+            var token = _jwtService.GenerateToken(request.Username);
+            var expiresAt = DateTime.UtcNow.AddMinutes(60); // Configurável via appsettings
+
+            _logger.LogInformation("Token gerado com sucesso para usuário: {Username}", request.Username);
+
+            return Ok(new AuthenticationResponseDto
+            {
+                Token = token,
+                TokenType = "Bearer",
+                ExpiresAt = expiresAt,
+                Username = request.Username
             });
         }
-
-        var token = _jwtService.GenerateToken(request.Username);
-        var expiresAt = DateTime.UtcNow.AddMinutes(60); // Configurável via appsettings
-
-        _logger.LogInformation("Token gerado com sucesso para usuário: {Username}", request.Username);
-
-        return Ok(new AuthenticationResponseDto
+        catch (Exception ex)
         {
-            Token = token,
-            TokenType = "Bearer",
-            ExpiresAt = expiresAt,
-            Username = request.Username
-        });
+            _logger.LogError(ex, "Erro durante autenticação do usuário: {Username}", request.Username);
+            return StatusCode(500, new ProblemDetails
+            {
+                Title = "Erro interno",
+                Detail = "Erro interno do servidor durante autenticação",
+                Status = StatusCodes.Status500InternalServerError
+            });
+        }
     }
 
-    /// <summary>
-    /// Valida se as credenciais são válidas
-    /// Em produção, isso deveria consultar uma base de dados ou serviço de identidade
-    /// </summary>
-    private static bool IsValidCredentials(string username, string password)
-    {
-        // Credenciais hardcoded para demonstração
-        // Em produção, validar contra base de dados com hash da senha
-        var validCredentials = new Dictionary<string, string>
-        {
-            { "admin", "123456" },
-            { "user", "password" },
-            { "test", "test123" }
-        };
 
-        return validCredentials.TryGetValue(username, out var validPassword) && 
-               validPassword == password;
-    }
 
     /// <summary>
     /// Endpoint para validar se o token atual ainda é válido

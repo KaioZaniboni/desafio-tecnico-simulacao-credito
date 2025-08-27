@@ -36,47 +36,167 @@ dotnet run
 http://localhost:5077/swagger
 ```
 
+## 🔐 Autenticação
+
+A API utiliza **autenticação JWT Bearer Token**. Todos os endpoints (exceto autenticação) requerem um token válido.
+
+### **Usuários de Teste**
+
+Os usuários são armazenados no banco de dados com senhas hasheadas via BCrypt.
+
+**Usuário criado via migration:**
+- **Username:** `testuser`
+- **Password:** `admin123`
+- **Email:** `testuser@simulacaocredito.com`
+
+> **🔒 Segurança:** Todas as senhas são armazenadas com hash BCrypt (work factor 12) no banco de dados. Nenhuma credencial está hardcoded no código.
+
+### **Consultar Usuários no Banco**
+
+Para verificar usuários existentes no banco de dados:
+
+```sql
+-- Listar todos os usuários
+SELECT Id, Username, Email, NomeCompleto, Ativo, DataCriacao, TentativasLogin, ContaBloqueada
+FROM Usuarios;
+
+-- Verificar usuário específico
+SELECT * FROM Usuarios WHERE Username = 'testuser';
+```
+
+### **Criar Novos Usuários**
+
+Para criar novos usuários, você pode:
+
+1. **Via SQL direto no banco:**
+```sql
+INSERT INTO Usuarios (Username, PasswordHash, Email, NomeCompleto, Ativo, DataCriacao, TentativasLogin, ContaBloqueada)
+VALUES (
+    'novouser',
+    '$2a$12$[HASH_BCRYPT_AQUI]',
+    'novouser@exemplo.com',
+    'Novo Usuário',
+    1,
+    SYSDATETIMEOFFSET(),
+    0,
+    0
+);
+```
+
+2. **Via migration (recomendado):**
+```bash
+dotnet ef migrations add AdicionarNovoUsuario --project SimulacaoCredito/SimulacaoCredito.csproj
+# Editar a migration para incluir INSERT SQL
+dotnet ef database update --project SimulacaoCredito/SimulacaoCredito.csproj
+```
+
+### **Obter Token JWT**
+```bash
+curl -X POST "http://localhost:5077/api/v1/auth/token" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "admin123"}'
+```
+
+**Resposta:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "expiresAt": "2025-08-27T18:30:00Z",
+  "username": "testuser"
+}
+```
+
 ## 📋 Endpoints da API
 
-Todos os endpoints têm o prefixo `/api/v1/`:
+**⚠️ Todos os endpoints (exceto `/auth/token`) requerem autenticação JWT**
 
-### **Simulações**
+### **🔐 Autenticação**
+- `POST /api/v1/auth/token` - Gerar token JWT (público)
+- `GET /api/v1/auth/validate` - Validar token atual
+
+### **📊 Simulações**
 - `POST /api/v1/simulacoes` - Criar nova simulação
 - `GET /api/v1/simulacoes` - Listar simulações (paginado)
 - `GET /api/v1/simulacoes/{id}` - Obter simulação por ID
 - `GET /api/v1/simulacoes/por-produto` - Volume por produto/dia
 
-### **Telemetria**
+### **📈 Telemetria**
 - `GET /api/v1/telemetria` - Dados de observabilidade
 
-### **Produtos (Debug)**
+### **🏪 Produtos**
 - `GET /api/v1/produtos` - Listar todos os produtos
 - `GET /api/v1/produtos/elegiveis` - Produtos elegíveis por valor/prazo
 
-## 🧪 Exemplos de Uso
+## 📦 Como Usar com Postman
 
-### **Criar Simulação**
-**JSON de exemplo:**
-```json
-{
-  "valorDesejado": 5000,
-  "prazo": 12
-}
+### **📥 Importar Collection**
+
+1. **Baixe os arquivos:**
+   - `SimulacaoCredito.postman_collection.json`
+   - `SimulacaoCredito.postman_environment.json`
+
+2. **No Postman:**
+   - Clique em **Import** → **File**
+   - Selecione ambos os arquivos
+   - Escolha o environment **"Simulação Crédito - Local"**
+
+### **🚀 Usar a Collection**
+
+1. **Gerar Token:**
+   - Execute `POST Generate JWT Token` na pasta **Authentication**
+   - O token será **automaticamente salvo** para uso nas outras requests
+
+2. **Fazer Requests:**
+   - Todos os outros endpoints usarão o token automaticamente
+   - Não precisa configurar nada manualmente!
+
+### **⚙️ Configurar Environment (Opcional)**
+
+Se precisar alterar configurações:
+
+| Variável | Valor Padrão | Descrição |
+|----------|--------------|-----------|
+| `base_url` | `http://localhost:5077` | URL da API |
+| `username` | `testuser` | Usuário para autenticação |
+| `password` | `admin123` | Senha para autenticação |
+
+## 🧪 Exemplos com cURL
+
+### **1. Obter Token**
+```bash
+curl -X POST "http://localhost:5077/api/v1/auth/token" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "admin123"}'
 ```
 
-### **Listar Simulações**
+### **2. Criar Simulação**
 ```bash
-curl -X GET "http://localhost:5077/api/v1/simulacoes?pagina=1&tamanhoPagina=10"
+curl -X POST "http://localhost:5077/api/v1/simulacoes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+  -d '{
+    "valorDesejado": 50000,
+    "prazo": 12
+  }'
 ```
 
-### **Obter Simulação por ID**
+### **3. Listar Simulações**
 ```bash
-curl -X GET "http://localhost:5077/api/v1/simulacoes/1"
+curl -X GET "http://localhost:5077/api/v1/simulacoes?pagina=1&tamanhoPagina=10" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
 ```
 
-### **Verificar Produtos Elegíveis**
+### **4. Obter Simulação por ID**
 ```bash
-curl -X GET "http://localhost:5077/api/v1/produtos/elegiveis?valor=5000&prazo=12"
+curl -X GET "http://localhost:5077/api/v1/simulacoes/1" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
+
+### **5. Verificar Produtos Elegíveis**
+```bash
+curl -X GET "http://localhost:5077/api/v1/produtos/elegiveis?valor=50000&prazo=12" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
 ```
 
 ## 🗃️ Configuração de Bancos
@@ -151,8 +271,11 @@ SimulacaoCredito/
 ├── Infrastructure/          # 🔧 Implementações
 │   ├── Data/                # Contextos e factory
 │   ├── Services/            # Serviços concretos (SAC/PRICE/EventHub)
+│   ├── Repositories/        # Repositórios de dados
+│   ├── Security/            # Autenticação e autorização
 │   └── Middleware/          # Telemetria e observabilidade
 ├── Controllers/             # 🌐 Endpoints da API
+├── Migrations/              # 🚀 Migrações do banco de dados
 └── Tests/                   # 🧪 Testes automatizados
 ```
 
@@ -210,6 +333,40 @@ A API implementa um sistema robusto de tratamento global de erros:
   "status": 400,
   "instance": "/api/v1/simulacoes"
 }
+```
+
+## 🔧 Troubleshooting
+
+### **❌ Problemas Comuns de Autenticação**
+
+#### **401 Unauthorized**
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7235#section-3.1",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Token JWT ausente ou inválido"
+}
+```
+
+**Soluções:**
+- Verifique se o header `Authorization: Bearer TOKEN` está presente
+- Confirme se o token não expirou (válido por 60 minutos)
+- Gere um novo token usando `/api/v1/auth/token`
+
+#### **403 Forbidden**
+- Token válido mas sem permissões suficientes
+- Verifique se está usando as credenciais corretas
+
+#### **Token Expirado**
+- Tokens JWT expiram em **60 minutos**
+- Gere um novo token quando necessário
+- No Postman, execute novamente "Generate JWT Token"
+
+### **🔍 Validar Token**
+```bash
+curl -X GET "http://localhost:5077/api/v1/auth/validate" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
 ```
 
 ### **📊 Logs Avançados**
