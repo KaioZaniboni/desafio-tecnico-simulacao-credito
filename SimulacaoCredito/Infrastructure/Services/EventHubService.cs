@@ -77,7 +77,9 @@ public class EventHubService : IEventHubService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao publicar evento {TipoEvento} no EventHub", tipoEvento);
+            _logger.LogError(ex,
+                "Erro ao publicar evento no EventHub. TipoEvento: {TipoEvento}, DataSize: {DataSize} bytes",
+                tipoEvento, System.Text.Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(dados)));
             throw;
         }
     }

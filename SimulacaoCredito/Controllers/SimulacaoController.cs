@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SimulacaoCredito.Application.DTOs;
 using SimulacaoCredito.Application.Interfaces;
+using SimulacaoCredito.Application.Contracts;
 using System.ComponentModel.DataAnnotations;
 
 namespace SimulacaoCredito.Controllers;
@@ -22,9 +23,35 @@ public class SimulacaoController : ControllerBase
     [HttpPost("simulacoes")]
     public async Task<ActionResult<SimulacaoResponseDto>> CriarSimulacao([FromBody] SimulacaoRequestDto request)
     {
+        // Validação usando Flunt
+        if (!request.IsValid())
+        {
+            var errors = request.Notifications.Select(n => new
+            {
+                Property = n.Key,
+                Message = n.Message
+            }).ToList();
+
+            return BadRequest(new ValidationProblemDetails
+            {
+                Title = "Dados inválidos",
+                Detail = "Um ou mais campos contêm valores inválidos",
+                Status = StatusCodes.Status400BadRequest,
+                Extensions = { { "errors", errors } }
+            });
+        }
+
         try
         {
+            _logger.LogInformation("Iniciando criação de simulação. ValorDesejado: {ValorDesejado}, Prazo: {Prazo}",
+                request.ValorDesejado, request.Prazo);
+
             var resultado = await _simulacaoService.CriarSimulacaoAsync(request);
+
+            _logger.LogInformation("Simulação criada com sucesso. ID: {IdSimulacao}, Produto: {CodigoProduto}, ValorTotal: {ValorTotal}",
+                resultado.IdSimulacao, resultado.CodigoProduto,
+                resultado.ResultadoSimulacao.FirstOrDefault()?.Parcelas.Sum(p => p.ValorPrestacao));
+
             return CreatedAtAction(nameof(ObterSimulacao), new { id = resultado.IdSimulacao }, resultado);
         }
         catch (InvalidOperationException ex)
@@ -36,76 +63,66 @@ public class SimulacaoController : ControllerBase
                 Status = StatusCodes.Status400BadRequest
             });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro interno ao criar simulação");
-            return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
-            {
-                Title = "Erro interno do servidor",
-                Detail = "Ocorreu um erro inesperado ao processar a simulação",
-                Status = StatusCodes.Status500InternalServerError
-            });
-        }
     }
 
     [HttpGet("simulacoes/{id:long}")]
     public async Task<ActionResult<SimulacaoResponseDto>> ObterSimulacao(long id)
     {
-        try
-        {
-            var simulacao = await _simulacaoService.ObterSimulacaoPorIdAsync(id);
-            
-            if (simulacao == null)
-            {
-                return NotFound(new ProblemDetails
-                {
-                    Title = "Simulação não encontrada",
-                    Detail = $"Não foi encontrada simulação com ID {id}",
-                    Status = StatusCodes.Status404NotFound
-                });
-            }
+        _logger.LogInformation("Buscando simulação por ID: {IdSimulacao}", id);
 
-            return Ok(simulacao);
-        }
-        catch (Exception ex)
+        var simulacao = await _simulacaoService.ObterSimulacaoPorIdAsync(id);
+
+        if (simulacao == null)
         {
-            _logger.LogError(ex, "Erro ao buscar simulação {Id}", id);
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            _logger.LogWarning("Simulação não encontrada. ID: {IdSimulacao}", id);
+            return NotFound(new ProblemDetails
+            {
+                Title = "Simulação não encontrada",
+                Detail = $"Não foi encontrada simulação com ID {id}",
+                Status = StatusCodes.Status404NotFound
+            });
         }
+
+        _logger.LogInformation("Simulação encontrada. ID: {IdSimulacao}, Produto: {CodigoProduto}",
+            simulacao.IdSimulacao, simulacao.CodigoProduto);
+        return Ok(simulacao);
     }
 
     [HttpGet("simulacoes")]
     [ProducesResponseType(typeof(ListaSimulacoesResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ListaSimulacoesResponseDto>> ListarSimulacoes(
-        [FromQuery, Range(1, int.MaxValue)] int pagina = 1,
-        [FromQuery, Range(1, 100)] int tamanhoPagina = 10)
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanhoPagina = 10)
     {
-        try
+        // Validação usando Flunt
+        var contract = new PaginacaoContract(pagina, tamanhoPagina);
+        if (!contract.IsValid)
         {
-            var resultado = await _simulacaoService.ListarSimulacoesAsync(pagina, tamanhoPagina);
-            return Ok(resultado);
+            var errors = contract.Notifications.Select(n => new
+            {
+                Property = n.Key,
+                Message = n.Message
+            }).ToList();
+
+            return BadRequest(new ValidationProblemDetails
+            {
+                Title = "Parâmetros de paginação inválidos",
+                Detail = "Os parâmetros de paginação informados são inválidos",
+                Status = StatusCodes.Status400BadRequest,
+                Extensions = { { "errors", errors } }
+            });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao listar simulações");
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+
+        var resultado = await _simulacaoService.ListarSimulacoesAsync(pagina, tamanhoPagina);
+        return Ok(resultado);
     }
 
     [HttpGet("simulacoes/por-produto")]
     public async Task<ActionResult<VolumePorProdutoDiaResponseDto>> ObterVolumePorProdutoDia(
         [FromQuery] DateTime dataReferencia)
     {
-        try
-        {
-            var resultado = await _simulacaoService.ObterVolumePorProdutoDiaAsync(dataReferencia);
-            return Ok(resultado);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao obter volume por produto/dia para {Data}", dataReferencia);
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+        var resultado = await _simulacaoService.ObterVolumePorProdutoDiaAsync(dataReferencia);
+        return Ok(resultado);
     }
 }

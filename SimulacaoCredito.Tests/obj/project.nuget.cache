@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "aKdiZj/0S/E=",
+  "dgSpecHash": "PEJ2o8YBHAs=",
   "success": true,
   "projectFilePath": "E:\\Users\\Black\\Downloads\\Nova pasta (2)\\desafio-tecnico-simulacao-credito\\SimulacaoCredito.Tests\\SimulacaoCredito.Tests.csproj",
   "expectedPackageFiles": [
@@ -10,6 +10,7 @@
     "E:\\Users\\Black\\.nuget\\packages\\azure.messaging.eventhubs\\5.12.2\\azure.messaging.eventhubs.5.12.2.nupkg.sha512",
     "E:\\Users\\Black\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
     "E:\\Users\\Black\\.nuget\\packages\\coverlet.collector\\6.0.0\\coverlet.collector.6.0.0.nupkg.sha512",
+    "E:\\Users\\Black\\.nuget\\packages\\flunt\\2.0.5\\flunt.2.0.5.nupkg.sha512",
     "E:\\Users\\Black\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.19\\microsoft.aspnetcore.openapi.8.0.19.nupkg.sha512",
     "E:\\Users\\Black\\.nuget\\packages\\microsoft.azure.amqp\\2.7.0\\microsoft.azure.amqp.2.7.0.nupkg.sha512",
     "E:\\Users\\Black\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\8.0.0\\microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",

@@ -177,3 +177,13 @@ E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\Simula
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Azure.Messaging.EventHubs.dll
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Microsoft.Azure.Amqp.dll
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\obj\Debug\net8.0\SimulacaoCredito.sourcelink.json
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Flunt.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.AspNetCore.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Extensions.Hosting.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Extensions.Logging.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Formatting.Compact.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Settings.Configuration.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Sinks.Console.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Sinks.Debug.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Serilog.Sinks.File.dll

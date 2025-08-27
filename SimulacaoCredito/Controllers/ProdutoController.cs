@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SimulacaoCredito.Application.Interfaces;
+using SimulacaoCredito.Application.Contracts;
+using Flunt.Notifications;
 
 namespace SimulacaoCredito.Controllers;
 
@@ -20,39 +22,42 @@ public class ProdutoController : ControllerBase
     [HttpGet("produtos")]
     public async Task<ActionResult> ListarProdutos()
     {
-        try
-        {
-            var produtos = await _produtoService.ObterTodosProdutosAsync();
-            return Ok(produtos);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao listar produtos");
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+        var produtos = await _produtoService.ObterTodosProdutosAsync();
+        return Ok(produtos);
     }
 
     [HttpGet("produtos/elegiveis")]
     public async Task<ActionResult> ObterProdutosElegiveis([FromQuery] decimal valor, [FromQuery] int prazo)
     {
-        try
+        // Validação usando Flunt
+        var contract = new ProdutoElegivelContract(valor, prazo);
+        if (!contract.IsValid)
         {
-            var produtosElegiveis = await _produtoService.ObterProdutosElegiveisAsync(valor, prazo);
-            
-            var resultado = new
+            var errors = contract.Notifications.Select(n => new
             {
-                Valor = valor,
-                Prazo = prazo,
-                ProdutosElegiveis = produtosElegiveis,
-                Quantidade = produtosElegiveis.Count
-            };
-            
-            return Ok(resultado);
+                Property = n.Key,
+                Message = n.Message
+            }).ToList();
+
+            return BadRequest(new ValidationProblemDetails
+            {
+                Title = "Parâmetros inválidos",
+                Detail = "Um ou mais parâmetros contêm valores inválidos",
+                Status = StatusCodes.Status400BadRequest,
+                Extensions = { { "errors", errors } }
+            });
         }
-        catch (Exception ex)
+
+        var produtosElegiveis = await _produtoService.ObterProdutosElegiveisAsync(valor, prazo);
+
+        var resultado = new
         {
-            _logger.LogError(ex, "Erro ao obter produtos elegíveis para valor {Valor} e prazo {Prazo}", valor, prazo);
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+            Valor = valor,
+            Prazo = prazo,
+            ProdutosElegiveis = produtosElegiveis,
+            Quantidade = produtosElegiveis.Count
+        };
+
+        return Ok(resultado);
     }
 }

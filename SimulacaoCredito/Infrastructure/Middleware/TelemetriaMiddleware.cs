@@ -35,7 +35,9 @@ public class TelemetriaMiddleware
 
             await telemetriaService.RegistrarRequisicaoAsync(nomeApi, (int)stopwatch.ElapsedMilliseconds, false);
 
-            _logger.LogError(ex, "Erro na requisição {NomeApi}", nomeApi);
+            _logger.LogError(ex,
+                "Erro na requisição. API: {NomeApi}, Duration: {Duration}ms, IP: {ClientIP}, Method: {Method}, Path: {Path}",
+                nomeApi, stopwatch.ElapsedMilliseconds, enderecoIp, context.Request.Method, context.Request.Path);
 
             throw;
         }

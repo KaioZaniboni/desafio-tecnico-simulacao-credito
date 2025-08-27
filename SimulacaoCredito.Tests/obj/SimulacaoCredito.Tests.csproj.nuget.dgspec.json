@@ -47,6 +47,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Flunt": {
+              "target": "Package",
+              "version": "[2.0.5, )"
+            },
             "Microsoft.EntityFrameworkCore.InMemory": {
               "target": "Package",
               "version": "[9.0.8, )"
@@ -134,6 +138,10 @@
             "Azure.Messaging.EventHubs": {
               "target": "Package",
               "version": "[5.12.2, )"
+            },
+            "Flunt": {
+              "target": "Package",
+              "version": "[2.0.5, )"
             },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",

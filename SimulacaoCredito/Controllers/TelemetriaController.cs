@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SimulacaoCredito.Application.DTOs;
 using SimulacaoCredito.Application.Interfaces;
+using SimulacaoCredito.Application.Contracts;
 
 namespace SimulacaoCredito.Controllers;
 
@@ -22,15 +23,26 @@ public class TelemetriaController : ControllerBase
     public async Task<ActionResult<TelemetriaResponseDto>> ObterTelemetriaDia(
         [FromQuery] DateTime dataReferencia)
     {
-        try
+        // Validação usando Flunt
+        var contract = new TelemetriaContract(dataReferencia);
+        if (!contract.IsValid)
         {
-            var resultado = await _telemetriaService.ObterTelemetriaDiaAsync(dataReferencia);
-            return Ok(resultado);
+            var errors = contract.Notifications.Select(n => new
+            {
+                Property = n.Key,
+                Message = n.Message
+            }).ToList();
+
+            return BadRequest(new ValidationProblemDetails
+            {
+                Title = "Data inválida",
+                Detail = "A data de referência informada é inválida",
+                Status = StatusCodes.Status400BadRequest,
+                Extensions = { { "errors", errors } }
+            });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao obter telemetria para {Data}", dataReferencia);
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+
+        var resultado = await _telemetriaService.ObterTelemetriaDiaAsync(dataReferencia);
+        return Ok(resultado);
     }
 }
