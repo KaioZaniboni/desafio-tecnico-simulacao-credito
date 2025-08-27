@@ -7,7 +7,7 @@ Sistema para simulação de crédito com cálculos de amortização SAC e PRICE,
 ### **Pré-requisitos**
 - Docker Desktop
 
-### **🐳 Execução via Docker (Recomendado)**
+### **🐳 Execução via Docker**
 
 ```bash
 # Clonar o repositório
@@ -21,7 +21,7 @@ docker-compose up -d
 http://localhost:5077/swagger
 ```
 
-### **💻 Execução Local (Desenvolvimento)**
+### **💻 Execução Local**
 
 ```bash
 # Subir apenas o banco de dados
