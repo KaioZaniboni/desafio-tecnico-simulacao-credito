@@ -22,32 +22,21 @@ public class TelemetriaMiddleware
         
         try
         {
-            // Log de início da requisição
-            _logger.LogInformation("Iniciando requisição {NomeApi} de {IP}", nomeApi, enderecoIp);
-
             await _next(context);
-            
+
             stopwatch.Stop();
             var sucesso = context.Response.StatusCode >= 200 && context.Response.StatusCode < 400;
-            
-            // Registrar telemetria
+
             await telemetriaService.RegistrarRequisicaoAsync(nomeApi, (int)stopwatch.ElapsedMilliseconds, sucesso);
-            
-            // Log de fim da requisição
-            _logger.LogInformation("Requisição {NomeApi} finalizada em {Tempo}ms com status {Status}", 
-                nomeApi, stopwatch.ElapsedMilliseconds, context.Response.StatusCode);
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            
-            // Registrar telemetria de erro
+
             await telemetriaService.RegistrarRequisicaoAsync(nomeApi, (int)stopwatch.ElapsedMilliseconds, false);
-            
-            // Log de erro
-            _logger.LogError(ex, "Erro na requisição {NomeApi} após {Tempo}ms", nomeApi, stopwatch.ElapsedMilliseconds);
-            
-            // Re-throw para manter o comportamento padrão
+
+            _logger.LogError(ex, "Erro na requisição {NomeApi}", nomeApi);
+
             throw;
         }
     }

@@ -176,3 +176,4 @@ E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\Simula
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito.Tests\obj\Debug\net8.0\SimulacaoCredito.Tests.pdb
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito.Tests\obj\Debug\net8.0\SimulacaoCredito.Tests.genruntimeconfig.cache
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito.Tests\obj\Debug\net8.0\ref\SimulacaoCredito.Tests.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito.Tests\obj\Debug\net8.0\SimulacaoCredito.Tests.sourcelink.json

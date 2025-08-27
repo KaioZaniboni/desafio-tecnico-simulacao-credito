@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SimulacaoCredito.Application.DTOs;
 using SimulacaoCredito.Application.Interfaces;
@@ -14,6 +15,7 @@ public class SimulacaoServiceTests : IDisposable
     private readonly AppDbContext _context;
     private readonly Mock<IProdutoService> _mockProdutoService;
     private readonly Mock<IEventHubService> _mockEventHubService;
+    private readonly Mock<ILogger<SimulacaoService>> _mockLogger;
     private readonly IAmortizacaoService _amortizacaoService;
     private readonly SimulacaoService _simulacaoService;
 
@@ -29,13 +31,15 @@ public class SimulacaoServiceTests : IDisposable
         // Configurar mocks
         _mockProdutoService = new Mock<IProdutoService>();
         _mockEventHubService = new Mock<IEventHubService>();
+        _mockLogger = new Mock<ILogger<SimulacaoService>>();
         _amortizacaoService = new AmortizacaoService();
-        
+
         _simulacaoService = new SimulacaoService(
-            _context, 
-            _mockProdutoService.Object, 
+            _context,
+            _mockProdutoService.Object,
             _amortizacaoService,
-            _mockEventHubService.Object);
+            _mockEventHubService.Object,
+            _mockLogger.Object);
     }
 
     [Fact]

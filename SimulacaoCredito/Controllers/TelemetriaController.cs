@@ -5,7 +5,7 @@ using SimulacaoCredito.Application.Interfaces;
 namespace SimulacaoCredito.Controllers;
 
 [ApiController]
-[Route("")]
+[Route("api/v1")]
 [Produces("application/json")]
 public class TelemetriaController : ControllerBase
 {
@@ -18,14 +18,7 @@ public class TelemetriaController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Obtém dados de telemetria para uma data específica
-    /// </summary>
-    /// <param name="dataReferencia">Data de referência (formato: yyyy-MM-dd)</param>
-    /// <returns>Dados de telemetria dos endpoints</returns>
     [HttpGet("telemetria")]
-    [ProducesResponseType(typeof(TelemetriaResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TelemetriaResponseDto>> ObterTelemetriaDia(
         [FromQuery] DateTime dataReferencia)
     {

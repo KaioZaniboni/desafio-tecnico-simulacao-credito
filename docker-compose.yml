@@ -28,7 +28,7 @@ services:
       - EventHub__ConnectionString=Endpoint=sb://eventhack.servicebus.windows.net/;SharedAccessKeyName=hack;SharedAccessKey=HeHeVaVayVkntO2FnjQcs2Ilh/4MUD0a4y+AEhKp8z+g=;EntityPath=simulacoes
       - EventHub__EntityPath=simulacoes
     ports:
-      - "8080:8080"
+      - "5077:8080"
     depends_on:
       - sqlserver
     networks:

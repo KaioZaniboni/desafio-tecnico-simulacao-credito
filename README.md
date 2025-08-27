@@ -1,45 +1,83 @@
-# 🏦 API de Simulação de Crédito
+# API de Simulação de Crédito
 
-> **Desafio Técnico 100% Concluído** - API completa para simulação de empréstimos com cálculos de amortização SAC e PRICE, integração EventHub e telemetria avançada.
+Sistema para simulação de crédito com cálculos de amortização SAC e PRICE, desenvolvido em .NET 8 com Clean Architecture.
 
-## 🎯 Visão Geral
+## 🚀 Como Executar
 
-Esta API permite simular empréstimos consultando produtos em banco SQL Server externo, calculando amortizações SAC e PRICE, persistindo dados localmente e publicando eventos no Azure EventHub.
+### **Pré-requisitos**
+- Docker Desktop
 
-## ⚡ Quick Start
+### **🐳 Execução via Docker (Recomendado)**
 
-### **1. Subir o Ambiente Completo**
 ```bash
-# Subir SQL Server local com usuário hackathon
-docker-compose up -d sqlserver
+# Clonar o repositório
+git clone <url-do-repositorio>
+cd desafio-tecnico-simulacao-credito
 
-# Aplicar migrations no banco local
-dotnet ef database update --project SimulacaoCredito --context AppDbContext
+# Subir toda a aplicação
+docker-compose up -d
 
-# Executar a API
-dotnet run --project SimulacaoCredito
-```
-
-### **2. Testar a API**
-```bash
 # Acessar Swagger UI
 http://localhost:5077/swagger
-
-# Criar uma simulação
-curl -X POST "http://localhost:5077/simulacoes" \
-  -H "Content-Type: application/json" \
-  -d '{"valorDesejado": 50000, "prazo": 24}'
 ```
 
-## 🌐 Endpoints Disponíveis
+### **💻 Execução Local (Desenvolvimento)**
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `POST` | `/simulacoes` | Criar nova simulação com cálculos SAC/PRICE |
-| `GET` | `/simulacoes/{id}` | Obter simulação específica por ID |
-| `GET` | `/simulacoes` | Listar simulações com paginação |
-| `GET` | `/simulacoes/por-produto` | Volume de simulações por produto/dia |
-| `GET` | `/telemetria` | Métricas de performance e observabilidade |
+```bash
+# Subir apenas o banco de dados
+docker-compose up -d sqlserver
+
+# Executar a aplicação
+cd SimulacaoCredito
+dotnet run
+
+# Acessar Swagger UI
+http://localhost:5077/swagger
+```
+
+## 📋 Endpoints da API
+
+Todos os endpoints têm o prefixo `/api/v1/`:
+
+### **Simulações**
+- `POST /api/v1/simulacoes` - Criar nova simulação
+- `GET /api/v1/simulacoes` - Listar simulações (paginado)
+- `GET /api/v1/simulacoes/{id}` - Obter simulação por ID
+- `GET /api/v1/simulacoes/por-produto` - Volume por produto/dia
+
+### **Telemetria**
+- `GET /api/v1/telemetria` - Dados de observabilidade
+
+### **Produtos (Debug)**
+- `GET /api/v1/produtos` - Listar todos os produtos
+- `GET /api/v1/produtos/elegiveis` - Produtos elegíveis por valor/prazo
+
+## 🧪 Exemplos de Uso
+
+### **Criar Simulação**
+
+**JSON de exemplo:**
+```json
+{
+  "valorDesejado": 5000,
+  "prazo": 12
+}
+```
+
+### **Listar Simulações**
+```bash
+curl -X GET "http://localhost:5077/api/v1/simulacoes?pagina=1&tamanhoPagina=10"
+```
+
+### **Obter Simulação por ID**
+```bash
+curl -X GET "http://localhost:5077/api/v1/simulacoes/1"
+```
+
+### **Verificar Produtos Elegíveis**
+```bash
+curl -X GET "http://localhost:5077/api/v1/produtos/elegiveis?valor=5000&prazo=12"
+```
 
 ## 🗃️ Configuração de Bancos
 
@@ -70,72 +108,19 @@ Senha: TimeBECIDNaSegundaFase
 
 ```
 SimulacaoCredito/
-├── Domain/                     # 🎯 Entidades de negócio
-│   └── Entities/              # Simulacao, Parcela, Produto, TelemetriaRequisicao
-├── Application/               # 📋 Camada de aplicação
-│   ├── DTOs/                 # Contratos de entrada/saída
-│   └── Interfaces/           # Abstrações de serviços
-├── Infrastructure/           # 🔧 Implementações
+├── Domain/                  # 🎯 Entidades de negócio
+│   └── Entities/            # Simulacao, Parcela, Produto, TelemetriaRequisicao
+├── Application/             # 📋 Camada de aplicação
+│   ├── DTOs/                # Contratos de entrada/saída
+│   └── Interfaces/          # Abstrações de serviços
+├── Infrastructure/          # 🔧 Implementações
 │   ├── Data/                # Contextos e factory
 │   ├── Services/            # Serviços concretos (SAC/PRICE/EventHub)
 │   └── Middleware/          # Telemetria e observabilidade
 ├── Controllers/             # 🌐 Endpoints da API
-└── Tests/                   # 🧪 11 testes (100% aprovados)
+└── Tests/                   # 🧪 Testes automatizados
 ```
 
-## 💰 Produtos Disponíveis
-
-| Produto | Taxa | Prazo (meses) | Valor (R$) |
-|---------|------|---------------|------------|
-| **Produto 1** | 1,79% | 0-24 | 200,00 - 10.000,00 |
-| **Produto 2** | 1,75% | 25-48 | 10.000,01 - 100.000,00 |
-| **Produto 3** | 1,82% | 49-96 | 100.000,01 - 1.000.000,00 |
-| **Produto 4** | 1,51% | 97+ | 1.000.000,01+ |
-
-## 📊 Exemplo de Uso
-
-### **Requisição:**
-```json
-POST /simulacoes
-{
-  "valorDesejado": 50000.00,
-  "prazo": 24
-}
-```
-
-### **Resposta:**
-```json
-{
-  "idSimulacao": 123,
-  "codigoProduto": 2,
-  "descricaoProduto": "Crédito Pessoal Premium",
-  "taxaJuros": 1.75,
-  "resultadoSimulacao": [
-    {
-      "tipo": "SAC",
-      "parcelas": [
-        {
-          "numero": 1,
-          "valorAmortizacao": 2083.33,
-          "valorJuros": 729.17,
-          "valorPrestacao": 2812.50
-        }
-      ]
-    },
-    {
-      "tipo": "PRICE",
-      "parcelas": [
-        {
-          "numero": 1,
-          "valorAmortizacao": 1895.45,
-          "valorJuros": 729.17,
-          "valorPrestacao": 2624.62
-        }
-      ]
-    }
-  ]
-}
-```
 ## ✅ Recursos Implementados
 
 ### **🧮 Cálculos Financeiros**
@@ -156,105 +141,30 @@ POST /simulacoes
 ### **🛡️ Qualidade**
 - **Validações robustas** - Data Annotations nos DTOs
 - **Tratamento de erros** - Respostas estruturadas com Problem Details
-- **Testes automatizados** - 11 testes unitários e de integração (100% aprovados)
+- **Testes automatizados** - Cobertura completa da aplicação
 
-## 🧪 Executar Testes
+## 📊 Dados de Teste
+
+O sistema vem com produtos pré-configurados no banco externo:
+
+### **Produtos Disponíveis**
+- **Produto 1**: Taxa 1,79% | 0-24 meses | R$ 200-10.000
+- **Produto 2**: Taxa 1,75% | 25-48 meses | R$ 10.000-100.000
+- **Produto 3**: Taxa 1,82% | 49-96 meses | R$ 100.000-1.000.000
+- **Produto 4**: Taxa 1,51% | 97+ meses | R$ 1.000.000+
+
+## 🧪 Testes
 
 ```bash
 # Executar todos os testes
-dotnet test SimulacaoCredito.Tests
+dotnet test
 
-# Executar com detalhes
-dotnet test SimulacaoCredito.Tests --verbosity normal
-
-# Resultado esperado: 11 testes aprovados ✅
+# Executar com cobertura
+dotnet test --collect:"XPlat Code Coverage"
 ```
 
-## 🐳 Docker
-
-### **Subir apenas o SQL Server:**
+### **Reset Completo**
 ```bash
-docker-compose up -d sqlserver
+docker-compose down -v
+docker-compose up -d --build
 ```
-
-### **Subir aplicação completa:**
-```bash
-docker-compose up -d
-```
-
-### **Verificar containers:**
-```bash
-docker ps
-```
-
-## 🔧 Tecnologias Utilizadas
-
-| Tecnologia | Versão | Uso |
-|------------|--------|-----|
-| **.NET** | 8.0 | Framework principal |
-| **Entity Framework Core** | 9.0 | ORM e migrations |
-| **SQL Server** | 2022 | Banco de dados |
-| **Azure EventHub** | Latest | Mensageria |
-| **Docker** | Latest | Containerização |
-| **xUnit** | Latest | Testes unitários |
-| **Moq** | Latest | Mocking para testes |
-| **Swagger/OpenAPI** | Latest | Documentação da API |
-
-## 🚀 Deploy e Produção
-
-### **Variáveis de Ambiente:**
-```bash
-# Connection Strings
-ConnectionStrings__SqlServer="Server=dbhackathon.database.windows.net,1433;Database=hack;User Id=hack;Password=Password23;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-ConnectionStrings__LocalSqlServer="Server=localhost,1433;Database=SimulacaoCredito;User Id=hackathon;Password=TimeBECIDNaSegundaFase;Encrypt=False;TrustServerCertificate=True;"
-
-# EventHub
-ConnectionStrings__EventHub="Endpoint=sb://eventhack.servicebus.windows.net/;SharedAccessKeyName=hack;SharedAccessKey=HeHeVaVayVkntO2FnjQcs2Ilh/4MUD0a4y+AEhKp8z+g=;EntityPath=simulacoes"
-EventHub__EntityPath="simulacoes"
-```
-
-### **Build para Produção:**
-```bash
-dotnet publish SimulacaoCredito -c Release -o ./publish
-```
-
-## 📋 Checklist de Funcionalidades
-
-- [x] ✅ **Receber requisições JSON** de simulação
-- [x] ✅ **Consultar produtos** no SQL Server externo
-- [x] ✅ **Validar parâmetros** de entrada
-- [x] ✅ **Filtrar produto elegível** (menor taxa de juros)
-- [x] ✅ **Calcular amortização SAC** com algoritmo preciso
-- [x] ✅ **Calcular amortização PRICE** com algoritmo preciso
-- [x] ✅ **Retornar JSON** com resultados da simulação
-- [x] ✅ **Persistir simulação** no banco local
-- [x] ✅ **Publicar evento** no Azure EventHub
-- [x] ✅ **Coletar telemetria** de performance
-- [x] ✅ **Documentar API** com Swagger
-- [x] ✅ **Testes automatizados** (100% aprovados)
-
-## 🎉 Status do Projeto
-
-**🏆 DESAFIO TÉCNICO 100% CONCLUÍDO**
-
-Todos os requisitos funcionais e técnicos foram implementados com sucesso:
-- ✅ 5 endpoints funcionais
-- ✅ Cálculos SAC e PRICE precisos
-- ✅ Integração EventHub
-- ✅ Telemetria completa
-- ✅ Clean Architecture
-- ✅ Testes automatizados
-- ✅ Docker Compose
-- ✅ Documentação completa
-
-**A aplicação está pronta para produção! 🚀**
-
----
-
-## 📞 Suporte
-
-Para dúvidas ou problemas:
-1. Verificar logs da aplicação
-2. Consultar documentação Swagger: `http://localhost:5077/swagger`
-3. Executar testes: `dotnet test SimulacaoCredito.Tests`
-4. Verificar containers: `docker ps`

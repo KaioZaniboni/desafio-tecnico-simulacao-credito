@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SimulacaoCredito.Application.DTOs;
 using SimulacaoCredito.Application.Interfaces;
 using SimulacaoCredito.Domain.Entities;
@@ -12,44 +13,42 @@ public class SimulacaoService : ISimulacaoService
     private readonly IProdutoService _produtoService;
     private readonly IAmortizacaoService _amortizacaoService;
     private readonly IEventHubService _eventHubService;
+    private readonly ILogger<SimulacaoService> _logger;
 
     public SimulacaoService(
         AppDbContext context,
         IProdutoService produtoService,
         IAmortizacaoService amortizacaoService,
-        IEventHubService eventHubService)
+        IEventHubService eventHubService,
+        ILogger<SimulacaoService> logger)
     {
         _context = context;
         _produtoService = produtoService;
         _amortizacaoService = amortizacaoService;
         _eventHubService = eventHubService;
+        _logger = logger;
     }
 
     public async Task<SimulacaoResponseDto> CriarSimulacaoAsync(SimulacaoRequestDto request)
     {
-        // Buscar produtos elegíveis
         var produtosElegiveis = await _produtoService.ObterProdutosElegiveisAsync(request.ValorDesejado, request.Prazo);
-        
+
         if (!produtosElegiveis.Any())
         {
             throw new InvalidOperationException("Nenhum produto disponível para os parâmetros informados.");
         }
 
-        // Selecionar o produto com menor taxa de juros
         var produtoSelecionado = produtosElegiveis.OrderBy(p => p.TaxaJuros).First();
 
-        // Calcular amortizações
         var resultadosAmortizacao = _amortizacaoService.CalcularAmortizacoes(
-            request.ValorDesejado, 
-            produtoSelecionado.TaxaJuros, 
+            request.ValorDesejado,
+            produtoSelecionado.TaxaJuros,
             request.Prazo);
 
-        // Calcular valor total das parcelas (usando SAC como referência)
         var valorTotalParcelas = resultadosAmortizacao
             .First(r => r.Tipo == "SAC")
             .Parcelas.Sum(p => p.ValorPrestacao);
 
-        // Criar simulação
         var simulacao = new Simulacao
         {
             DataCriacao = DateTimeOffset.Now,
@@ -64,11 +63,10 @@ public class SimulacaoService : ISimulacaoService
         _context.Simulacoes.Add(simulacao);
         await _context.SaveChangesAsync();
 
-        // Salvar parcelas
         foreach (var resultado in resultadosAmortizacao)
         {
             var tipoAmortizacao = resultado.Tipo == "SAC" ? TipoAmortizacao.SAC : TipoAmortizacao.PRICE;
-            
+
             foreach (var parcelaDto in resultado.Parcelas)
             {
                 var parcela = new Parcela
@@ -80,14 +78,13 @@ public class SimulacaoService : ISimulacaoService
                     ValorJuros = parcelaDto.ValorJuros,
                     ValorPrestacao = parcelaDto.ValorPrestacao
                 };
-                
+
                 _context.Parcelas.Add(parcela);
             }
         }
 
         await _context.SaveChangesAsync();
 
-        // Publicar evento no EventHub
         try
         {
             await _eventHubService.PublicarSimulacaoCriadaAsync(
@@ -98,12 +95,9 @@ public class SimulacaoService : ISimulacaoService
         }
         catch (Exception ex)
         {
-            // Log do erro mas não falha a operação
-            // O evento será publicado em background ou retry
-            Console.WriteLine($"Erro ao publicar evento: {ex.Message}");
+            _logger.LogWarning(ex, "Erro ao publicar evento no EventHub");
         }
 
-        // Retornar resposta
         return new SimulacaoResponseDto
         {
             IdSimulacao = simulacao.Id,
@@ -123,7 +117,6 @@ public class SimulacaoService : ISimulacaoService
         if (simulacao == null)
             return null;
 
-        // Agrupar parcelas por tipo de amortização
         var resultadosAmortizacao = simulacao.Parcelas
             .GroupBy(p => p.TipoAmortizacao)
             .Select(g => new ResultadoAmortizacaoDto

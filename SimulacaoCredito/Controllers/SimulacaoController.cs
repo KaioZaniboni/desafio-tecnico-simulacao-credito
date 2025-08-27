@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 namespace SimulacaoCredito.Controllers;
 
 [ApiController]
-[Route("")]
+[Route("api/v1")]
 [Produces("application/json")]
 public class SimulacaoController : ControllerBase
 {
@@ -19,31 +19,16 @@ public class SimulacaoController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Cria uma nova simulação de crédito
-    /// </summary>
-    /// <param name="request">Dados da simulação</param>
-    /// <returns>Resultado da simulação com cálculos SAC e PRICE</returns>
     [HttpPost("simulacoes")]
-    [ProducesResponseType(typeof(SimulacaoResponseDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SimulacaoResponseDto>> CriarSimulacao([FromBody] SimulacaoRequestDto request)
     {
         try
         {
-            _logger.LogInformation("Iniciando criação de simulação - Valor: {Valor}, Prazo: {Prazo}", 
-                request.ValorDesejado, request.Prazo);
-
             var resultado = await _simulacaoService.CriarSimulacaoAsync(request);
-            
-            _logger.LogInformation("Simulação criada com sucesso - ID: {Id}", resultado.IdSimulacao);
-            
             return CreatedAtAction(nameof(ObterSimulacao), new { id = resultado.IdSimulacao }, resultado);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogWarning("Erro de validação na simulação: {Erro}", ex.Message);
             return BadRequest(new ProblemDetails
             {
                 Title = "Parâmetros inválidos",
@@ -63,14 +48,7 @@ public class SimulacaoController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Obtém uma simulação por ID
-    /// </summary>
-    /// <param name="id">ID da simulação</param>
-    /// <returns>Dados completos da simulação</returns>
     [HttpGet("simulacoes/{id:long}")]
-    [ProducesResponseType(typeof(SimulacaoResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<SimulacaoResponseDto>> ObterSimulacao(long id)
     {
         try
@@ -96,12 +74,6 @@ public class SimulacaoController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Lista simulações com paginação
-    /// </summary>
-    /// <param name="pagina">Número da página (padrão: 1)</param>
-    /// <param name="tamanhoPagina">Tamanho da página (padrão: 10, máximo: 100)</param>
-    /// <returns>Lista paginada de simulações</returns>
     [HttpGet("simulacoes")]
     [ProducesResponseType(typeof(ListaSimulacoesResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -121,14 +93,7 @@ public class SimulacaoController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Obtém volume de simulações por produto em uma data específica
-    /// </summary>
-    /// <param name="dataReferencia">Data de referência (formato: yyyy-MM-dd)</param>
-    /// <returns>Volume de simulações agrupado por produto</returns>
     [HttpGet("simulacoes/por-produto")]
-    [ProducesResponseType(typeof(VolumePorProdutoDiaResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<VolumePorProdutoDiaResponseDto>> ObterVolumePorProdutoDia(
         [FromQuery] DateTime dataReferencia)
     {

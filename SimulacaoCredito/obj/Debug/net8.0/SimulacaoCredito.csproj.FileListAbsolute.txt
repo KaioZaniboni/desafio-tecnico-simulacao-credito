@@ -176,3 +176,4 @@ E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\Simula
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Azure.Core.Amqp.dll
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Azure.Messaging.EventHubs.dll
 E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\bin\Debug\net8.0\Microsoft.Azure.Amqp.dll
+E:\Users\Black\Downloads\Nova pasta (2)\desafio-tecnico-simulacao-credito\SimulacaoCredito\obj\Debug\net8.0\SimulacaoCredito.sourcelink.json

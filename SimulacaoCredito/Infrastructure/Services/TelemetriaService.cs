@@ -36,7 +36,6 @@ public class TelemetriaService : ITelemetriaService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao registrar telemetria para {NomeApi}", nomeApi);
-            // Não propaga o erro para não afetar a requisição principal
         }
     }
 
