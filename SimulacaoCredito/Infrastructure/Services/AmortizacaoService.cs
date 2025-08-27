@@ -9,7 +9,9 @@ public class AmortizacaoService : IAmortizacaoService
     public List<ParcelaDto> CalcularSAC(decimal valorPrincipal, decimal taxaJurosAnual, int numeroParcelas)
     {
         var parcelas = new List<ParcelaDto>();
-        var taxaJurosMensal = taxaJurosAnual / 12 / 100;
+        // Taxa vem em formato decimal anual (ex: 0.0179 para 1.79% ao ano)
+        // Convertendo para taxa mensal: taxa_anual / 12
+        var taxaJurosMensal = taxaJurosAnual / 12;
         var valorAmortizacao = valorPrincipal / numeroParcelas;
         var saldoDevedor = valorPrincipal;
 
@@ -35,7 +37,9 @@ public class AmortizacaoService : IAmortizacaoService
     public List<ParcelaDto> CalcularPRICE(decimal valorPrincipal, decimal taxaJurosAnual, int numeroParcelas)
     {
         var parcelas = new List<ParcelaDto>();
-        var taxaJurosMensal = taxaJurosAnual / 12 / 100;
+        // Taxa vem em formato decimal anual (ex: 0.0179 para 1.79% ao ano)
+        // Convertendo para taxa mensal: taxa_anual / 12
+        var taxaJurosMensal = taxaJurosAnual / 12;
 
         var prestacaoFixa = valorPrincipal * (taxaJurosMensal * (decimal)Math.Pow((double)(1 + taxaJurosMensal), numeroParcelas)) /
                            ((decimal)Math.Pow((double)(1 + taxaJurosMensal), numeroParcelas) - 1);

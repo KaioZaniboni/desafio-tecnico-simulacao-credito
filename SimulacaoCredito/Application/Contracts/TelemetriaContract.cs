@@ -10,6 +10,6 @@ public class TelemetriaContract : Contract<DateTime>
         Requires()
             .IsNotNull(dataReferencia, nameof(dataReferencia), "Data de referência é obrigatória")
             .IsLowerOrEqualsThan(dataReferencia.Date, DateTime.Now.Date, nameof(dataReferencia), "Data de referência não pode ser futura")
-            .IsGreaterThan(dataReferencia.Date, DateTime.Now.Date.AddYears(-1), nameof(dataReferencia), "Data de referência não pode ser anterior a 1 ano");
+            .IsGreaterOrEqualsThan(dataReferencia.Date, DateTime.Now.Date.AddYears(-1), nameof(dataReferencia), "Data de referência não pode ser anterior a 1 ano");
     }
 }

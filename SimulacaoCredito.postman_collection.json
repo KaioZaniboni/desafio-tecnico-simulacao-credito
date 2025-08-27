@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
 		"name": "Simulação de Crédito API",
-		"description": "API para simulação de crédito com autenticação JWT Bearer Token.\n\n## 🔐 Como Usar\n\n1. **Importe o Environment**: `SimulacaoCredito.postman_environment.json`\n2. **Execute primeiro**: `POST Generate JWT Token` na pasta Authentication\n3. **Use qualquer endpoint**: O token será usado automaticamente!\n\n## 📋 Endpoints Disponíveis\n\n- **Authentication**: Gerar e validar tokens JWT\n- **Simulações**: Criar, listar e consultar simulações\n- **Produtos**: Consultar produtos elegíveis\n- **Telemetria**: Dados de observabilidade\n\n## ⚙️ Configurações\n\n- **base_url**: http://localhost:5077\n- **username**: admin\n- **password**: 123456\n\nTodos os endpoints (exceto autenticação) requerem token JWT válido.",
+		"description": "API para simulação de crédito com autenticação JWT Bearer Token.\n\n## 🔐 Como Usar\n\n1. **Importe o Environment**: `SimulacaoCredito.postman_environment.json`\n2. **Execute primeiro**: `POST Generate JWT Token` na pasta Authentication\n3. **Use qualquer endpoint**: O token será usado automaticamente!\n\n## 📋 Endpoints Disponíveis\n\n- **Authentication**: Gerar e validar tokens JWT\n- **Simulações**: Criar, listar e consultar simulações\n- **Produtos**: Consultar produtos elegíveis\n- **Telemetria**: Dados de observabilidade\n\n## ⚙️ Configurações\n\n- **base_url**: http://localhost:5077\n- **username**: testuser\n- **password**: admin123\n\nTodos os endpoints (exceto autenticação) requerem token JWT válido.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "12345678"
 	},
@@ -65,7 +65,7 @@
 								"token"
 							]
 						},
-						"description": "Gera um token JWT para autenticação.\n\n**Credenciais disponíveis:**\n- admin / 123456\n- user / password\n- test / test123\n\n**O token é salvo automaticamente** e usado nas outras requests."
+						"description": "Gera um token JWT para autenticação.\n\n**Credenciais disponíveis:**\n- testuser / admin123 (usuário padrão criado automaticamente)\n\n**O token é salvo automaticamente** e usado nas outras requests."
 					},
 					"response": []
 				},
@@ -426,9 +426,14 @@
 									"if (pm.response.code === 200) {",
 									"    const response = pm.response.json();",
 									"    console.log('✅ Dados de telemetria obtidos com sucesso!');",
-									"    console.log('📊 Total de registros:', response.length);",
-									"    if (response.length > 0) {",
-									"        console.log('📅 Período:', response[0].dataHora, 'até', response[response.length - 1].dataHora);",
+									"    console.log('📅 Data de referência:', response.dataReferencia);",
+									"    console.log('📊 Total de endpoints:', response.listaEndpoints.length);",
+									"    if (response.listaEndpoints.length > 0) {",
+									"        response.listaEndpoints.forEach(endpoint => {",
+									"            console.log(`🔗 ${endpoint.nomeApi}: ${endpoint.qtdRequisicoes} requisições, ${endpoint.percentualSucesso}% sucesso`);",
+									"        });",
+									"    } else {",
+									"        console.log('📊 Nenhum dado de telemetria encontrado para esta data.');",
 									"    }",
 									"} else {",
 									"    console.log('❌ Erro ao obter telemetria:', pm.response.text());",
@@ -442,7 +447,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/v1/telemetria",
+							"raw": "{{base_url}}/api/v1/telemetria?dataReferencia=2024-08-27",
 							"host": [
 								"{{base_url}}"
 							],
@@ -450,9 +455,16 @@
 								"api",
 								"v1",
 								"telemetria"
+							],
+							"query": [
+								{
+									"key": "dataReferencia",
+									"value": "2024-08-27",
+									"description": "Data de referência no formato yyyy-MM-dd (máximo 1 ano atrás). Altere para a data desejada."
+								}
 							]
 						},
-						"description": "Obtém dados de telemetria e observabilidade da aplicação.\n\n**Retorna:** Métricas de uso, performance e logs da aplicação."
+						"description": "Obtém dados de telemetria e observabilidade da aplicação para uma data específica.\n\n**Parâmetros:**\n- `dataReferencia` (obrigatório): Data no formato yyyy-MM-dd (máximo 1 ano atrás)\n\n**Retorna:** Métricas de uso, performance e logs da aplicação para a data especificada.\n\n**Exemplo:** `?dataReferencia=2024-08-27`"
 					},
 					"response": []
 				}
