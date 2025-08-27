@@ -8,7 +8,7 @@ Sistema para simulação de crédito com cálculos de amortização SAC e PRICE,
 - Docker Desktop
 - .NET 8.0 SDK (para desenvolvimento local)
 
-### **🐳 Execução via Docker (Recomendado)**
+### **🐳 Execução via Docker**
 
 ```bash
 # Clonar o repositório
@@ -22,7 +22,7 @@ docker-compose up -d
 http://localhost:5077/swagger
 ```
 
-### **💻 Execução Local (Desenvolvimento)**
+### **💻 Execução Local**
 
 ```bash
 # Subir apenas o banco de dados
@@ -86,7 +86,7 @@ curl -X GET "http://localhost:5077/api/v1/produtos/elegiveis?valor=5000&prazo=12
 - **Database:** hack
 - **Usuário:** hack
 - **Senha:** Password23
-- **Tabela:** dbo.Produto (4 produtos disponíveis)
+- **Tabela:** dbo.Produto
 
 ### **Banco Local (Persistência - Docker)**
 - **Host:** localhost:1433
