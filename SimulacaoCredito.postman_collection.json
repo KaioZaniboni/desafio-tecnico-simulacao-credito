@@ -447,7 +447,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/v1/telemetria?dataReferencia=2024-08-27",
+							"raw": "{{base_url}}/api/v1/telemetria?dataReferencia=2025-08-27",
 							"host": [
 								"{{base_url}}"
 							],
@@ -459,12 +459,12 @@
 							"query": [
 								{
 									"key": "dataReferencia",
-									"value": "2024-08-27",
+									"value": "2025-08-27",
 									"description": "Data de referência no formato yyyy-MM-dd (máximo 1 ano atrás). Altere para a data desejada."
 								}
 							]
 						},
-						"description": "Obtém dados de telemetria e observabilidade da aplicação para uma data específica.\n\n**Parâmetros:**\n- `dataReferencia` (obrigatório): Data no formato yyyy-MM-dd (máximo 1 ano atrás)\n\n**Retorna:** Métricas de uso, performance e logs da aplicação para a data especificada.\n\n**Exemplo:** `?dataReferencia=2024-08-27`"
+						"description": "Obtém dados de telemetria e observabilidade da aplicação para uma data específica.\n\n**Parâmetros:**\n- `dataReferencia` (obrigatório): Data no formato yyyy-MM-dd (máximo 1 ano atrás)\n\n**Retorna:** Métricas de uso, performance e logs da aplicação para a data especificada.\n\n**Exemplo:** `?dataReferencia=2025-08-27`"
 					},
 					"response": []
 				}
