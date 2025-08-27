@@ -145,7 +145,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"valorDesejado\": 50000,\n  \"prazo\": 12\n}",
+							"raw": "{\n  \"valorDesejado\": 5000,\n  \"prazo\": 12\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -383,7 +383,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/v1/produtos/elegiveis?valor=50000&prazo=12",
+							"raw": "{{base_url}}/api/v1/produtos/elegiveis?valor=5000&prazo=12",
 							"host": [
 								"{{base_url}}"
 							],
@@ -396,7 +396,7 @@
 							"query": [
 								{
 									"key": "valor",
-									"value": "50000",
+									"value": "5000",
 									"description": "Valor desejado do empréstimo"
 								},
 								{

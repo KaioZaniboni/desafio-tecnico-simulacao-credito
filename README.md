@@ -16,7 +16,7 @@ git clone <url-do-repositorio>
 cd desafio-tecnico-simulacao-credito
 
 # Subir toda a aplicação
-docker-compose up -d
+docker-compose up -d build
 
 # Acessar Swagger UI
 http://localhost:5077/swagger
