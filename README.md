@@ -86,7 +86,7 @@ curl -X GET "http://localhost:5077/api/v1/produtos/elegiveis?valor=5000&prazo=12
 - **Database:** hack
 - **Usuário:** hack
 - **Senha:** Password23
-- **Tabela:** dbo.Produto (4 produtos disponíveis)
+- **Tabela:** dbo.Produto
 
 ### **Banco Local (Persistência - Docker)**
 - **Host:** localhost:1433
