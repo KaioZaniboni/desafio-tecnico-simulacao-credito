@@ -1,0 +1,227 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Simulação de Crédito API",
+		"description": "API para simulação de crédito com autenticação JWT Bearer Token.\n\n## 🔐 Como Usar\n\n1. **Importe o Environment**: `SimulacaoCredito.postman_environment.json`\n2. **Execute primeiro**: `POST Generate JWT Token` na pasta Authentication\n3. **Use qualquer endpoint**: O token será usado automaticamente!\n\n## 📋 Endpoints Disponíveis\n\n- **Authentication**: Gerar e validar tokens JWT\n- **Simulações**: Criar, listar e consultar simulações\n- **Produtos**: Consultar produtos elegíveis\n- **Telemetria**: Dados de observabilidade\n\n## ⚙️ Configurações\n\n- **base_url**: http://localhost:5077\n- **username**: admin\n- **password**: 123456\n\nTodos os endpoints (exceto autenticação) requerem token JWT válido.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "POST Generate JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Salvar token automaticamente para uso nas outras requests",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('jwt_token', response.token);",
+									"    pm.collectionVariables.set('token_expires_at', response.expiresAt);",
+									"    pm.collectionVariables.set('current_username', response.username);",
+									"    ",
+									"    console.log('✅ Token JWT salvo automaticamente!');",
+									"    console.log('👤 Usuário:', response.username);",
+									"    console.log('⏰ Expira em:', response.expiresAt);",
+									"    console.log('🔑 Token:', response.token.substring(0, 50) + '...');",
+									"} else {",
+									"    console.log('❌ Erro ao gerar token:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"token"
+							]
+						},
+						"description": "Gera um token JWT para autenticação.\n\n**Credenciais disponíveis:**\n- admin / 123456\n- user / password\n- test / test123\n\n**O token é salvo automaticamente** e usado nas outras requests."
+					},
+					"response": []
+				},
+				{
+					"name": "GET Validate Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Token válido para usuário:', response.username);",
+									"    console.log('⏰ Validado em:', response.validatedAt);",
+									"} else if (pm.response.code === 401) {",
+									"    console.log('❌ Token inválido ou expirado. Execute \"Generate JWT Token\" novamente.');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/validate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"validate"
+							]
+						},
+						"description": "Valida se o token JWT atual ainda é válido.\n\n**Requer:** Token JWT válido no header Authorization."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para autenticação JWT.\n\n**Execute primeiro** o \"Generate JWT Token\" para obter acesso aos outros endpoints."
+		},
+		{
+			"name": "📊 Simulações",
+			"item": [
+				{
+					"name": "POST Criar Simulação",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('last_simulacao_id', response.idSimulacao);",
+									"    console.log('✅ Simulação criada com sucesso!');",
+									"    console.log('🆔 ID:', response.idSimulacao);",
+									"    console.log('🏪 Produto:', response.descricaoProduto);",
+									"    console.log('💰 Valor:', 'R$', response.valorDesejado.toLocaleString('pt-BR'));",
+									"} else {",
+									"    console.log('❌ Erro ao criar simulação:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"valorDesejado\": 50000,\n  \"prazo\": 12\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/simulacoes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"simulacoes"
+							]
+						},
+						"description": "Cria uma nova simulação de crédito.\n\n**Parâmetros:**\n- valorDesejado: Valor do empréstimo (R$ 1.000 - R$ 2.000.000)\n- prazo: Prazo em meses (1 - 420)\n\n**Retorna:** Simulação com cálculos SAC e PRICE"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Verificar se o token existe e não expirou",
+					"const token = pm.collectionVariables.get('jwt_token');",
+					"const expiresAt = pm.collectionVariables.get('token_expires_at');",
+					"",
+					"if (!token) {",
+					"    console.log('⚠️ Token JWT não encontrado. Execute \"Generate JWT Token\" primeiro.');",
+					"} else if (expiresAt && new Date() > new Date(expiresAt)) {",
+					"    console.log('⚠️ Token JWT expirado. Execute \"Generate JWT Token\" novamente.');",
+					"    pm.collectionVariables.unset('jwt_token');",
+					"} else {",
+					"    console.log('✅ Token JWT válido encontrado.');",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token_expires_at",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "current_username",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "last_simulacao_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
